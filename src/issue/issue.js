@@ -16,6 +16,7 @@ export default class Issue {
 
     static createAlternative(options) {
         return {
+            uid: Symbol(),
             title: null,
             votes: 0,
             dateAdded: new Date(),
