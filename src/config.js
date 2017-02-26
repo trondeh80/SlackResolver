@@ -1,7 +1,7 @@
-import {getSlackToken} from './env' ;
+import {SLACK_API_TOKEN} from './env' ;
 
 export default function getConfig(options = {}){
     return {...options,
-        token: getSlackToken()
+        token: SLACK_API_TOKEN
     }
 }
