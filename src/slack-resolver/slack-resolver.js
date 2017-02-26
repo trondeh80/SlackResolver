@@ -98,7 +98,8 @@ export default class SlackResolver {
             }
         });
         if (this.issue.winnerIndex > -1) {
-            bot.reply(message, `We will go for this: ${this.issue.alternatives[this.issue.winnerIndex].title}`);
+            this.issue.resolved = true ;
+            bot.reply(message, `Conclusion: ${this.issue.alternatives[this.issue.winnerIndex].title}`);
         } else {
             bot.reply(message, 'Issue not concluded yet') ;
         }
@@ -107,6 +108,5 @@ export default class SlackResolver {
     hasVoted() {
         return !!this.issue.voters[this.activeUserId];
     }
-
 
 }
