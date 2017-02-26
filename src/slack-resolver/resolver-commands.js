@@ -1,21 +1,22 @@
 import Issue from '../issue/issue' ;
 
-export default class Resolver {
+export default class ResolverCommands {
 
     constructor(slackResolver) {
         this.slackResolver = slackResolver;
     }
 
-    showHelp() {
-        this.sendReply(`Resolver polls a group for a conclusion. Here are the commands
-"Resolve: <issue>" - will create a new poll
-"AddAlternative: <alternative>" - Adds an alternative to the poll
-"Vote: <alternativeNumber>" - Registeres your vote on the alternative
-"ListAlternatives" - lists all available alternatives and their votes
-"ClearIssues" - will reset the poll
-"Conclude! - will finish the poll and present the winner"`);
+    getCommands() {
+        return [
+            {commands: ['Resolve:'], method: this.createIssue.bind(this)},
+            {commands: ['Conclude!', 'Conclude:'], method: this.concludeIssue.bind(this)},
+            {commands: ['AddAlternative:'], method: this.addAlternative.bind(this)},
+            {commands: ['Vote:'], method: this.voteAlternative.bind(this)},
+            {commands: ['ListAlternatives'], method: this.listAlternatives.bind(this)},
+            {commands: ['ClearIssues'], method: this.clearIssue.bind(this)},
+            {commands: ['HelpResolve'], method: this.showHelp.bind(this)},
+        ];
     }
-
 
     createIssue(message) {
         if (this.issue && !this.issue.resolved) {
@@ -42,7 +43,6 @@ export default class Resolver {
         }
 
         this.issue.alternatives.push(Issue.createAlternative({title: alternativeTitle}));
-
         this.slackResolver.sendReply(`Alternative '${alternativeTitle}' has been added`);
     }
 
@@ -99,6 +99,16 @@ export default class Resolver {
 
     hasVoted() {
         return !!this.issue.voters[this.activeUserId];
+    }
+
+    showHelp() {
+        this.sendReply(`Resolver polls a group for a conclusion. Here are the commands
+"Resolve: <issue>" - will create a new poll
+"AddAlternative: <alternative>" - Adds an alternative to the poll
+"Vote: <alternativeNumber>" - Registeres your vote on the alternative
+"ListAlternatives" - lists all available alternatives and their votes
+"ClearIssues" - will reset the poll
+"Conclude! - will finish the poll and present the winner"`);
     }
 
 }

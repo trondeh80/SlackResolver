@@ -1,5 +1,7 @@
-const Botkit = require('botkit') ;
-import Resolver from './resolver' ;
+const Botkit = require('botkit');
+
+import ResolverCommands from './resolver-commands' ;
+import GhostCommands from './ghost-commands' ;
 
 export default class SlackResolver {
 
@@ -14,42 +16,34 @@ export default class SlackResolver {
         this.controller.spawn({
             token: this.options.token
         }).startRTM();
-        this.resolver = new Resolver(this);
+        this.resolverCommands = new ResolverCommands(this);
+        this.ghostCommands = new GhostCommands(this);
         this.addListeners();
     }
 
     addListeners() {
-
         const listeningMethods = 'direct_message,direct_mention,mention';
 
-        // Resolving commands:
-        this.controller.hears(['Resolve:'], listeningMethods, this.runCommand(this.resolver.createIssue.bind(this.resolver)));
-        this.controller.hears(['Conclude!', 'Conclude:'], listeningMethods, this.runCommand(this.resolver.concludeIssue.bind(this.resolver)));
-        this.controller.hears(['ClearIssues'], listeningMethods, this.runCommand(this.resolver.clearIssue.bind(this.resolver)));
-        this.controller.hears(['AddAlternative:'], listeningMethods, this.runCommand(this.resolver.addAlternative.bind(this.resolver)));
-        this.controller.hears(['Vote:'], listeningMethods, this.runCommand(this.resolver.voteAlternative.bind(this.resolver)));
-        this.controller.hears(['ListAlternatives'], listeningMethods, this.runCommand(this.resolver.listAlternatives.bind(this.resolver)));
+        // Register resolver commands
+        this.resolverCommands.getCommands().forEach((cmd) => {
+            this.controller.hears(cmd.commands, listeningMethods, this.getRunnableCommand(cmd.method));
+        });
 
-        // help
-        this.controller.hears(['HelpResolve'], listeningMethods, this.runCommand(this.resolver.showHelp.bind(this.resolver)));
-
-        // Random
-        this.controller.hears(['RTFM'], listeningMethods, this.runCommand(this.readManual.bind(this)));
-
+        // Register secret random commands
+        this.ghostCommands.getCommands().forEach((cmd) => {
+            this.controller.hears(cmd.commands, listeningMethods, this.getRunnableCommand(() => {
+                this.sendReply(cmd.response);
+            }));
+        });
     }
 
-    runCommand(replyFunction) {
+    getRunnableCommand(replyFunction) {
         return (bot, message) => {
             this.bot = bot;
             this.message = message;
             this.activeUserId = message.user;
             replyFunction(message);
         }
-    }
-
-
-    readManual() {
-        this.sendReply('https://nerddrivel.files.wordpress.com/2013/05/moses-rtfm.jpg');
     }
 
     sendReply(output) {
