@@ -20,33 +20,38 @@ export default class ResolverCommands {
 
     createIssue(message) {
         if (this.issue && !this.issue.resolved) {
-            return this.slackResolver.sendReply(`Current issue is not resolved: ${this.issue.title}. (To clear, type "ClearIssues")`);
+            return this.reply(`Current issue is not resolved: ${this.issue.title}. (To clear, type "ClearIssues")`);
         }
-        const issueTitle = message.text.replace(/Resolve\:/, '').trim();
+        const issueTitle = message.text.replace(/Resolve:/, '').trim();
         this.issue = Issue.createIssue({id: 1, title: issueTitle});
-        this.slackResolver.sendReply(`Lets resolve: ${issueTitle}`);
+        this.reply(`Lets resolve: ${issueTitle}`);
     }
 
     clearIssue() {
         this.issue = null;
-        this.slackResolver.sendReply('All issues are cleared');
+        this.reply('All issues are cleared');
     }
 
     addAlternative(message) {
-        const alternativeTitle = message.text.replace(/AddAlternative\:/, '').trim();
+        const alternativeTitle = message.text.replace(/AddAlternative:/, '').trim();
+        if (!this.issue){
+            console.log(typeof(this.issue.alternatives)) ;
+            return this.reply('You need to create an issue first using "Resolve: <issue text>"') ;
+        }
+
         const existingAlternative = this.issue.alternatives.find((alt) => {
             return alt.title === alternativeTitle;
         });
         if (existingAlternative) {
-            return this.slackResolver.sendReply(`${alternativeTitle} is allready listed`);
+            return this.reply(`${alternativeTitle} is allready listed`);
         }
 
         this.issue.alternatives.push(Issue.createAlternative({title: alternativeTitle}));
-        this.slackResolver.sendReply(`Alternative '${alternativeTitle}' has been added`);
+        this.reply(`Alternative '${alternativeTitle}' has been added`);
     }
 
     voteAlternative(message) {
-        const vote = message.text.replace(/Vote\:/, '').trim();
+        const vote = message.text.replace(/Vote:/, '').trim();
         const alternative = this.issue.alternatives.find((alt, index) => (index + 1 === Number.parseInt(vote)));
 
         if (alternative) {
@@ -55,12 +60,12 @@ export default class ResolverCommands {
                 this.issue.voters[this.activeUserId].votes--;
             }
             this.issue.voters[this.activeUserId] = alternative;
-            this.slackResolver.sendReply(`Vote received.`);
+            this.reply(`Vote received.`);
             this.listAlternatives();
 
         } else {
 
-            this.slackResolver.sendReply(`Your vote for #${vote} is not in the list!`);
+            this.reply(`Your vote for #${vote} is not in the list!`);
             this.listAlternatives();
 
         }
@@ -68,14 +73,14 @@ export default class ResolverCommands {
 
     listAlternatives() {
         if (!this.issue) {
-            return this.slackResolver.sendReply('There are no issues up for vote.');
+            return this.reply('There are no issues up for vote.');
         }
         let listReply = `Ok, here are the current alternatives for "${this.issue.title}"`;
         this.issue.alternatives.forEach((item, index) => {
             const humanIndex = index + 1;
             listReply += `\n#${humanIndex}: ${item.title} has received ${item.votes} votes`;
         });
-        this.slackResolver.sendReply(listReply);
+        this.reply(listReply);
     }
 
     concludeIssue() {
@@ -88,9 +93,9 @@ export default class ResolverCommands {
         });
         if (this.issue.winnerIndex > -1) {
             this.issue.resolved = true;
-            this.slackResolver.sendReply(`Conclusion: ${this.issue.alternatives[this.issue.winnerIndex].title}`);
+            this.reply(`Conclusion: ${this.issue.alternatives[this.issue.winnerIndex].title}`);
         } else {
-            this.slackResolver.sendReply('Issue not concluded yet');
+            this.reply('Issue not concluded yet');
         }
     }
 
@@ -106,6 +111,10 @@ export default class ResolverCommands {
 "ListAlternatives" - lists all available alternatives and their votes
 "ClearIssues" - will reset the poll
 "Conclude! - will finish the poll and present the winner"`);
+    }
+
+    reply(msg){
+        this.slackResolver.sendReply(msg) ;
     }
 
 }
