@@ -25,7 +25,6 @@ export default class ResolverCommands {
         const issueTitle = message.text.replace(/Resolve\:/, '').trim();
         this.issue = Issue.createIssue({id: 1, title: issueTitle});
         this.slackResolver.sendReply(`Lets resolve: ${issueTitle}`);
-        console.log(`Created new issue: "${issueTitle}"`);
     }
 
     clearIssue() {
@@ -47,10 +46,8 @@ export default class ResolverCommands {
     }
 
     voteAlternative(message) {
-        const vote = message.text.replace('Vote:', '').trim();
-        const alternative = this.issue.alternatives.find((alt, index) => {
-            return index + 1 === Number.parseInt(vote);
-        });
+        const vote = message.text.replace(/Vote\:/, '').trim();
+        const alternative = this.issue.alternatives.find((alt, index) => (index + 1 === Number.parseInt(vote)));
 
         if (alternative) {
             alternative.votes++;
