@@ -9,6 +9,7 @@ export default class Issue {
             resolved: false,
             start: new Date(),
             end: void 0,
+            winnerIndex: -1,
             ...options
         }
     }

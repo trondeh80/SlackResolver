@@ -26,13 +26,13 @@ export default class SlackResolver {
         this.controller.hears(['ListAlternatives'], 'direct_message, direct_mention, mention', this.runCommand(this.listAlternatives.bind(this)));
     }
 
-    runCommand(fn) {
+    runCommand(replyFunction) {
         return function (bot, message) {
             console.log('User: ', message.user);
-            this.bot = bot ;
+            this.bot = bot;
             this.message = message;
             this.activeUserId = message.user;
-            fn(bot, message);
+            replyFunction(bot, message);
         }
     }
 
@@ -65,15 +65,19 @@ export default class SlackResolver {
     }
 
     voteIssue(bot, message) {
-        const vote = message.text.replace('^Vote:', '').trim();
+        const vote = message.text.replace('Vote:', '').trim();
         const alternative = this.issue.alternatives.find((alt, index) => {
             return index + 1 === Number.parseInt(vote);
         });
         if (alternative && !this.hasVoted()) {
             alternative.votes++;
             this.issue.voters[this.activeUserId] = true;
+            bot.reply(message, 'Vote received');
+        } else if (!alternative) {
+            bot.reply(message, `Your vote for #${vote} is not in the list!`) ;
+            this.listAlternatives(bot,message) ;
         }
-        bot.reply(message, 'Vote received');
+
     }
 
     listAlternatives(bot, message) {
@@ -85,19 +89,24 @@ export default class SlackResolver {
         bot.reply(message, listReply);
     }
 
-    concludeIssue(){
+    concludeIssue(bot, message) {
+        let maxVotes = 0 ;
         this.issue.alternatives.forEach((alt, index) => {
-            this.issue.winnerIndex = alt.votes > this.winnerIndex ? index : this.winnerIndex;
-        }) ;
-        this.reply() ;
+            if (alt.votes > maxVotes) {
+                maxVotes = alt.votes ;
+                this.issue.winnerIndex = index;
+            }
+        });
+        if (this.issue.winnerIndex > -1) {
+            bot.reply(message, `We will go for this: ${this.issue.alternatives[this.issue.winnerIndex].title}`);
+        } else {
+            bot.reply(message, 'Issue not concluded yet') ;
+        }
     }
 
     hasVoted() {
         return !!this.issue.voters[this.activeUserId];
     }
 
-    reply(reply){
-        this.bot.reply(this.message, reply) ;
-    }
 
 }
