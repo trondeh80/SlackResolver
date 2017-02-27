@@ -35,7 +35,6 @@ export default class ResolverCommands {
     addAlternative(message) {
         const alternativeTitle = message.text.replace(/AddAlternative:/, '').trim();
         if (!this.issue){
-            console.log(typeof(this.issue.alternatives)) ;
             return this.reply('You need to create an issue first using "Resolve: <issue text>"') ;
         }
 
