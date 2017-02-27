@@ -1,20 +1,21 @@
 import Issue from '../issue/issue' ;
+import Commands from './commands' ;
 
-export default class ResolverCommands {
+export default class ResolverCommands extends Commands {
 
     constructor(slackResolver) {
-        this.slackResolver = slackResolver;
+        super(slackResolver);
     }
 
     getCommands() {
         return [
-            {commands: ['Resolve:'], method: this.createIssue.bind(this)},
-            {commands: ['Conclude!', 'Conclude:'], method: this.concludeIssue.bind(this)},
-            {commands: ['AddAlternative:'], method: this.addAlternative.bind(this)},
-            {commands: ['Vote:'], method: this.voteAlternative.bind(this)},
-            {commands: ['ListAlternatives'], method: this.listAlternatives.bind(this)},
-            {commands: ['ClearIssues'], method: this.clearIssue.bind(this)},
-            {commands: ['HelpResolve'], method: this.showHelp.bind(this)},
+            Commands.createCommand({commands: ['Resolve:'], method: this.createIssue.bind(this)}),
+            Commands.createCommand({commands: ['Conclude!'], method: this.concludeIssue.bind(this)}),
+            Commands.createCommand({commands: ['AddAlternative:'], method: this.addAlternative.bind(this)}),
+            Commands.createCommand({commands: ['Vote:'], method: this.voteAlternative.bind(this)}),
+            Commands.createCommand({commands: ['ListAlternatives'], method: this.listAlternatives.bind(this)}),
+            Commands.createCommand({commands: ['ClearIssues'], method: this.clearIssue.bind(this)}),
+            Commands.createCommand({commands: ['HelpResolve'], method: this.showHelp.bind(this)}),
         ];
     }
 
@@ -34,8 +35,8 @@ export default class ResolverCommands {
 
     addAlternative(message) {
         const alternativeTitle = message.text.replace(/AddAlternative:/, '').trim();
-        if (!this.issue){
-            return this.reply('You need to create an issue first using "Resolve: <issue text>"') ;
+        if (!this.issue) {
+            return this.reply('You need to create an issue first using "Resolve: <issue text>"');
         }
 
         const existingAlternative = this.issue.alternatives.find((alt) => {
@@ -110,10 +111,6 @@ export default class ResolverCommands {
 "ListAlternatives" - lists all available alternatives and their votes
 "ClearIssues" - will reset the poll
 "Conclude! - will finish the poll and present the winner"`);
-    }
-
-    reply(msg){
-        this.slackResolver.sendReply(msg) ;
     }
 
 }

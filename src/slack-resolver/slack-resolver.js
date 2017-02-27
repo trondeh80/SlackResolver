@@ -2,6 +2,7 @@ const Botkit = require('botkit');
 
 import ResolverCommands from './resolver-commands' ;
 import GhostCommands from './ghost-commands' ;
+import RemoteCommands from './remote-commands' ;
 
 export default class SlackResolver {
 
@@ -18,22 +19,22 @@ export default class SlackResolver {
         }).startRTM();
         this.resolverCommands = new ResolverCommands(this);
         this.ghostCommands = new GhostCommands(this);
+        this.remoteCommands = new RemoteCommands(this);
         this.addListeners();
     }
 
     addListeners() {
         const listeningMethods = 'direct_message,direct_mention,mention';
 
-        // Register resolver commands
-        this.resolverCommands.getCommands().forEach((cmd) => {
-            this.controller.hears(cmd.commands, listeningMethods, this.getRunnableCommand(cmd.method));
-        });
-
-        // Register secret random commands
-        this.ghostCommands.getCommands().forEach((cmd) => {
-            this.controller.hears(cmd.commands, listeningMethods, this.getRunnableCommand(() => {
-                this.sendReply(cmd.response);
-            }));
+        // Register commands
+        [...this.resolverCommands.getCommands(),
+            ...this.remoteCommands.getCommands(),
+            ...this.ghostCommands.getCommands()
+        ].forEach((cmd) => {
+            this.controller.hears(cmd.commands, cmd.listeningMethods || listeningMethods,
+                this.getRunnableCommand(!cmd.response ? cmd.method : () => {
+                    this.sendReply(cmd.response);
+                }));
         });
     }
 
