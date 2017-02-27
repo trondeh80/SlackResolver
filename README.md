@@ -8,5 +8,6 @@ To install:
 
 To run babel on the code and transpile it:
  - npm install
+ 
 "node dist/app.js" will then start your bot, invoke it with:
  - npm run start
