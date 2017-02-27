@@ -13,31 +13,40 @@ export default class SlackResolver {
         });
     }
 
+    /**
+     * Boots the server, initiates the commands and adds them to the listener
+     */
     start() {
         this.controller.spawn({
             token: this.options.token
         }).startRTM();
-        this.resolverCommands = new ResolverCommands(this);
-        this.ghostCommands = new GhostCommands(this);
-        this.remoteCommands = new RemoteCommands(this);
+        this.resolverCommands = new ResolverCommands(this); // For the resolver/poll functionality
+        this.ghostCommands = new GhostCommands(this); // Text 2 links
+        this.remoteCommands = new RemoteCommands(this); // Controlling the slack-bot
         this.addListeners();
     }
 
+    /**
+     * Adds commands to the BotKit controller's hear method.
+     */
     addListeners() {
         const listeningMethods = 'direct_message,direct_mention,mention';
-
-        // Register commands
-        [...this.resolverCommands.getCommands(),
+        [
+            ...this.resolverCommands.getCommands(),
             ...this.remoteCommands.getCommands(),
             ...this.ghostCommands.getCommands()
         ].forEach((cmd) => {
             this.controller.hears(cmd.commands, cmd.listeningMethods || listeningMethods,
-                this.getRunnableCommand(!cmd.response ? cmd.method : () => {
-                    this.sendReply(cmd.response);
-                }));
+                this.getRunnableCommand(cmd.response ? () => this.sendReply(cmd.response) : cmd.method));
         });
     }
 
+    /**
+     * Curried function. Every command must run the returned function before they execute.
+     *
+     * @param replyFunction
+     * @returns {function(message)}
+     */
     getRunnableCommand(replyFunction) {
         return (bot, message) => {
             this.bot = bot;
@@ -47,8 +56,12 @@ export default class SlackResolver {
         }
     }
 
+    /**
+     * Main message reply command. All messages are piped through this
+     * @param output
+     */
     sendReply(output) {
-        this.bot.reply(this.message, output)
+        this.bot.reply(this.message, output) ;
     }
 
 }
