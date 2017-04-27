@@ -20,6 +20,7 @@ export default class SlackResolver {
         this.controller.spawn({
             token: this.options.token
         }).startRTM();
+
         this.resolverCommands = new ResolverCommands(this); // For the resolver/poll functionality
         this.ghostCommands = new GhostCommands(this); // Text 2 links
         this.remoteCommands = new RemoteCommands(this); // Controlling the slack-bot

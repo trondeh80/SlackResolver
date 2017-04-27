@@ -4,12 +4,12 @@ export default class RemoteCommands extends Commands {
 
     constructor(slackResolver) {
         super(slackResolver);
-        this.sayRegExp = /say\@([^:\s]{0,21}):?/gim;
+        this.sayRegExp = /^say@([^:\s]*)?[\s|:\s]+(.*)/g;
     }
 
     getCommands() {
         return [
-            Commands.createCommand({commands: [this.sayRegExp], method: this.sayInChannel.bind(this)})
+            Commands.createCommand({commands: ['say@'], method: this.sayInChannel.bind(this)})
         ];
     }
 
