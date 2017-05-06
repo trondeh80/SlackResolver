@@ -8,7 +8,7 @@ export default class GhostCommands extends Commands {
 
     getCommands() {
         return [
-            Commands.createCommand({commands: ['CATS!'], response: 'https://youtu.be/UBIc7P_Bnf8'}),
+            Commands.createCommand({commands: ['CATS!'], response: 'https://www.youtube.com/watch?v=AGfC68d2114'}),
             Commands.createCommand({commands: ['RTFM'], response: 'https://nerddrivel.files.wordpress.com/2013/05/moses-rtfm.jpg'}),
             Commands.createCommand({commands: ['get rect'], response: 'https://i.redd.it/l8fyqjfnv3iy.png'}),
             Commands.createCommand({commands: ['dateformat'], response: 'https://i.imgur.com/9jGxnbB.png'}),

@@ -13,18 +13,37 @@ export default class SlackResolver {
         });
     }
 
+    startBotKit(){
+        return new Promise((resolve, reject) => {
+            this.controller.spawn({
+                token: this.options.token
+            }).startRTM((error) => {
+                if (error) {
+                    reject();
+                } else {
+                    resolve();
+                }
+            });
+        });
+    }
+
     /**
      * Boots the server, initiates the commands and adds them to the listener
      */
     start() {
-        this.controller.spawn({
-            token: this.options.token
-        }).startRTM();
-
-        this.resolverCommands = new ResolverCommands(this); // For the resolver/poll functionality
-        this.ghostCommands = new GhostCommands(this); // Text 2 links
-        this.remoteCommands = new RemoteCommands(this); // Controlling the slack-bot
-        this.addListeners();
+        // this.controller.spawn({
+        //     token: this.options.token
+        // }).startRTM((error, bot, payload) => {
+        //
+        // });
+        this.startBotKit().then(() => {
+            this.resolverCommands = new ResolverCommands(this); // For the resolver/poll functionality
+            this.ghostCommands = new GhostCommands(this); // Text 2 links
+            this.remoteCommands = new RemoteCommands(this); // Controlling the slack-bot
+            this.addListeners();
+        }).catch(() => {
+           setTimeout(this.start, 5000);
+        });
     }
 
     /**
