@@ -1,6 +1,6 @@
 {
   "name": "slack-resolver",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A slack bot for resolving issues",
   "main": "src/app.js",
   "scripts": {
@@ -23,6 +23,6 @@
     "babel-preset-stage-0": "^6.22.0"
   },
   "dependencies": {
-    "botkit": "^0.5.1"
+    "botkit": "^0.5.4"
   }
 }

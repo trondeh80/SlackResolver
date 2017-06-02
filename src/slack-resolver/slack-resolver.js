@@ -1,8 +1,8 @@
-const Botkit = require('botkit');
-
 import ResolverCommands from './resolver-commands' ;
 import GhostCommands from './ghost-commands' ;
 import RemoteCommands from './remote-commands' ;
+
+const Botkit = require('botkit');
 
 export default class SlackResolver {
 
@@ -16,7 +16,8 @@ export default class SlackResolver {
     startBotKit(){
         return new Promise((resolve, reject) => {
             this.controller.spawn({
-                token: this.options.token
+                token: this.options.token,
+                retry: this.options.retry || 10
             }).startRTM((error) => {
                 if (error) {
                     reject();
@@ -31,11 +32,6 @@ export default class SlackResolver {
      * Boots the server, initiates the commands and adds them to the listener
      */
     start() {
-        // this.controller.spawn({
-        //     token: this.options.token
-        // }).startRTM((error, bot, payload) => {
-        //
-        // });
         this.startBotKit().then(() => {
             this.resolverCommands = new ResolverCommands(this); // For the resolver/poll functionality
             this.ghostCommands = new GhostCommands(this); // Text 2 links
