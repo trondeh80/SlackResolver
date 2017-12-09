@@ -6,7 +6,9 @@
   "scripts": {
     "start": "babel ./src -d ./dist --watch",
     "server": "\"node dist/app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "keywords": [
     "slack",
@@ -23,6 +25,8 @@
     "babel-preset-stage-0": "^6.22.0"
   },
   "dependencies": {
-    "botkit": "^0.5.4"
-  }
+    "botkit": "^0.5.4",
+    "snyk": "^1.42.7"
+  },
+  "snyk": true
 }
